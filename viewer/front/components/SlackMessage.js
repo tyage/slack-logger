@@ -114,7 +114,13 @@ export default class extends Component {
                 </div>
               ) : (
                 <div className="slack-message-text">
-                  <MrkdwnText text={text} />
+                  { message.subtype === 'tombstone' ? (
+                    <span className="slack-message-tombstone">
+                      このメッセージは消去されました。<a href="https://github.com/tsg-ut/tsgbot/issues/3" target="_black">詳細</a>
+                    </span>
+                  ) : (
+                    <MrkdwnText text={text} />
+                  ) }
                 </div>
               )
             }
@@ -184,7 +190,7 @@ export default class extends Component {
         />
     };
 
-    if (this.props.message.hidden) {
+    if (this.props.message.hidden && this.props.message.subtype !== 'tombstone') {
       return null;
     }
 
