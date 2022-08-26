@@ -11,3 +11,7 @@ Slack::RealTime::Client.configure do |c|
   c.start_method = :rtm_connect
   c.store_class = Slack::RealTime::Stores::Starter
 end
+
+Slack::Events.configure do |c|
+  c.signing_secret = config['slack']&.[]('events_api')&.[]('signing_secret')
+end
