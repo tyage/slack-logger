@@ -1305,6 +1305,7 @@ DEPENDENCIES
   mongo
   nokogiri
   puma
+  rack (~> 2.2)
   rubyzip
   sinatra
   slack-ruby-client
