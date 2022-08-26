@@ -10,7 +10,7 @@ class SlackRTMReceiver
         next
       end
 
-      puts m
+      puts 'new message'
       logger.insert_message(m)
     end
 
@@ -42,7 +42,7 @@ class SlackRTMReceiver
     # if connection closed, restart the realtime logger
     realtime.on :close do
       puts "websocket disconnected"
-      start!
+      start! logger
     end
 
     realtime.start!

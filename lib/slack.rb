@@ -13,5 +13,5 @@ Slack::RealTime::Client.configure do |c|
 end
 
 Slack::Events.configure do |c|
-  c.signing_secret = config['slack']&.[]('events_api')&.[]('signing_secret')
+  c.signing_secret = config['slack']['events_api'] ? config['slack']['signing_secret'] : nil
 end

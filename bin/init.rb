@@ -5,7 +5,10 @@ require 'securerandom'
 # XXX using string hash key for backword compatibility...
 config = {
   'slack' => {
-    'token' => nil
+    'token' => nil,
+    'team_id' => nil,
+    'events_api' => false,
+    'signing_secret' => nil,
   },
   'aws' => {
     'access_key_id' => nil,
