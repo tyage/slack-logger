@@ -24,7 +24,8 @@ class SlackEventsReceiver
           warn 'bad request: %s' % e
           [400, {}, '']
         end
-      end
+      end,
+      Port: 9293,
     )
   end
 
