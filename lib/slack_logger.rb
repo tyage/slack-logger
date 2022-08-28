@@ -2,8 +2,6 @@ require 'yaml'
 require './lib/slack'
 require './lib/db'
 
-config = YAML.load_file('./config.yml')
-
 class SlackLogger
   attr_reader :client
 
@@ -17,6 +15,11 @@ class SlackLogger
 
   def is_direct_message(channel_name)
     channel_name[0] == 'D'
+  end
+
+  alias :_insert_message :insert_message # FIXME!!!
+  def insert_message(message)
+    _insert_message(message)
   end
 
   def update_users
@@ -50,61 +53,9 @@ class SlackLogger
     end
   end
 
-  # realtime events
-  def log_realtime
-    realtime = Slack::RealTime::Client.new
-
-    realtime.on :message do |m|
-      if is_private_channel(m['channel'])
-        next
-      end
-      if is_direct_message(m['channel'])
-        next
-      end
-
-      puts m
-      insert_message(m)
-    end
-
-    realtime.on :team_join do |e|
-      puts "new user has joined"
-      update_users
-    end
-
-    realtime.on :user_change do |e|
-      puts "user data has changed"
-      update_users
-    end
-
-    realtime.on :channel_created do |c|
-      puts "channel has created"
-      update_channels
-    end
-
-    realtime.on :channel_rename do |c|
-      puts "channel has renamed"
-      update_channels
-    end
-
-    realtime.on :emoji_changed do |c|
-      puts "emoji has changed"
-      update_emojis
-    end
-
-    # if connection closed, restart the realtime logger
-    realtime.on :close do
-      puts "websocket disconnected"
-      log_realtime
-    end
-
-    realtime.start!
-  end
-
-  def start
+  def start(receiver)
     begin
-      realtime_thread = Thread.new {
-        log_realtime
-      }
+      receiver_thread = Thread.new { receiver.start!(self) }
 
       update_emojis
       update_users
@@ -119,9 +70,9 @@ class SlackLogger
       end
 
       # realtime event is joined and dont exit current thread
-      realtime_thread.join
+      receiver_thread.join
     ensure
-      realtime_thread.kill
+      receiver_thread.kill
     end
   end
 end
