@@ -17,9 +17,14 @@ class SlackLogger
     channel_name[0] == 'D'
   end
 
-  alias :_insert_message :insert_message # FIXME!!!
-  def insert_message(message)
-    _insert_message(message)
+  def skip_message?(message)
+    channel = message['channel']
+    is_private_channel(channel) || is_direct_message(channel)
+  end
+
+  def new_message(message)
+    return if skip_message?(message)
+    insert_message(message)
   end
 
   def update_users

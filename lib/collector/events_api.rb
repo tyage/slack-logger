@@ -20,8 +20,8 @@ module Collector
             Slack::Events::Request.new(req).verify!
             process(req.body)
           rescue Slack::Events::Request::MissingSigningSecret,
-            Slack::Events::Request::InvalidSignature,
-            Slack::Events::Request::TimestampExpired => e
+                 Slack::Events::Request::InvalidSignature,
+                 Slack::Events::Request::TimestampExpired => e
             warn 'bad request: %s' % e
             [400, {}, '']
           end
@@ -54,12 +54,8 @@ module Collector
       case type
       when 'message'
         # https://api.slack.com/events/message
-        return if logger.is_private_channel(event['channel'])
-        return if logger.is_direct_message(event['channel'])
-
         puts 'new message'
-
-        logger.insert_message(event)
+        logger.new_message(event)
 
       when 'team_join'
         puts 'new user has joined'

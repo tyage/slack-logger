@@ -4,15 +4,8 @@ module Collector
       realtime = Slack::RealTime::Client.new
 
       realtime.on :message do |m|
-        if logger.is_private_channel(m['channel'])
-          next
-        end
-        if logger.is_direct_message(m['channel'])
-          next
-        end
-
         puts 'new message'
-        logger.insert_message(m)
+        logger.new_message(m)
       end
 
       realtime.on :team_join do |e|
