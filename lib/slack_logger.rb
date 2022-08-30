@@ -53,9 +53,9 @@ class SlackLogger
     end
   end
 
-  def start(receiver)
+  def start(collector)
     begin
-      receiver_thread = Thread.new { receiver.start!(self) }
+      collector_thread = Thread.new { collector.start!(self) }
 
       update_emojis
       update_users
@@ -70,9 +70,9 @@ class SlackLogger
       end
 
       # realtime event is joined and dont exit current thread
-      receiver_thread.join
+      collector_thread.join
     ensure
-      receiver_thread.kill
+      collector_thread.kill
     end
   end
 end

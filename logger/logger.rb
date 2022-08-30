@@ -1,10 +1,10 @@
 require './lib/slack'
 
 require './lib/slack_logger'
-require './lib/slack_events_receiver'
-require './lib/slack_rtm_receiver'
+require './lib/collector/events_api'
+require './lib/collector/rtm'
 
 config = YAML.load_file('./config.yml')
 
-receiver = config['slack']['use_events_api'] ? SlackEventsReceiver.new(config['slack']['team_id']) : SlackRTMReceiver.new
-SlackLogger.new.start receiver
+collector = config['slack']['use_events_api'] ? Collector::EventsAPI.new(config['slack']['team_id']) : Collector::RTM.new
+SlackLogger.new.start collector
