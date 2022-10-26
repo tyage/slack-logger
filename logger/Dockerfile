@@ -16,9 +16,9 @@ RUN set -x && \
 
 COPY Gemfile ${SRCDIR}/
 COPY Gemfile.lock ${SRCDIR}/
+RUN cd ${SRCDIR} && bundle install
 
 WORKDIR ${SRCDIR}
 
-RUN bundle install
 
 CMD /wait-for-it.sh -t 0 mongo:27017 -- /wait-for-it.sh -t 0 elasticsearch:9200 -- bundle exec ruby logger/logger.rb
