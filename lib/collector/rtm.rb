@@ -40,6 +40,7 @@ module Collector
         end
 
         realtime.start!
+        sleep 3 # なんかの理由で無限ループしても大丈夫なようにおきもち
       end
     end
   end
