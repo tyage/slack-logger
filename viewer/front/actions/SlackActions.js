@@ -200,6 +200,15 @@ export default {
       });
     };
   },
+  setDisplayOption(option, value) {
+    return dispatch => {
+      dispatch({
+        type: SlackConstants.UPDATE_DISPLAY_OPTION,
+        option,
+        value,
+      });
+    };
+  },
   updateSearchWord(word) {
     return push(`/search/${encodeURIComponent(word)}`);
   },
