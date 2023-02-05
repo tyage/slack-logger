@@ -27,6 +27,14 @@ class SlackLogger
     insert_message(message)
   end
 
+  def new_reaction(ts, name, user)
+    add_reaction(ts, name, user)
+  end
+
+  def drop_reaction(ts, name, user)
+    remove_reaction(ts, name, user)
+  end
+
   def update_users
     users = client.users_list['members']
     replace_users(users)
