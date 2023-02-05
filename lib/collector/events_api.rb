@@ -77,6 +77,16 @@ module Collector
         puts 'emoji has changed'
         logger.update_emojis
       end
+
+      when 'reaction_added'
+        puts "reaction has added"
+        logger.new_reaction(event['item']['ts'], event['reaction'], event['user'])
+      end
+
+      when 'reaction_removed'
+        puts "reaction has removed"
+        logger.drop_reaction(event['item']['ts'], event['reaction'], event['user'])
+      end
     end
   end
 end
