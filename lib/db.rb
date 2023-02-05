@@ -14,14 +14,15 @@ def denormalize_message(message)
           'name' => reaction['name'],
           'user' => reaction['user'],
         }]
-      end
-      if reaction.has_key? 'users'
+      elsif reaction.has_key? 'users'
         reaction['users'].map do |user|
           {
             'name' => reaction['name'],
             'user' => user,
           }
         end
+      else
+        []
       end
     end
   end
@@ -39,6 +40,9 @@ def normalize_message(message)
       }
     end
     message['reactions'].map do |reaction|
+      if reaction.nil?
+        next
+      end
       if reaction.has_key? 'user'
         reactions[reaction['name']]['users'] << reaction['user']
         reactions[reaction['name']]['count'] += 1
