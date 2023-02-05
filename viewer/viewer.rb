@@ -108,6 +108,7 @@ def messages(params)
   return_messages = return_messages.reverse if ts_direction == -1
 
   sign_message_files(return_messages)
+  normalize_messages(return_messages)
 
   return return_messages, has_more_message
 end
@@ -166,6 +167,7 @@ def search(params)
     end
     all_messages = all_messages.reverse if ts_direction == 'desc'
     sign_message_files(all_messages)
+    normalize_messages(all_messages)
     # FIXME: The meaning of hits.total.value might change in ElasticSearch 8
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#hits-total-now-object-search-response
     return all_messages, res_data['hits']['total']['value'] > limit

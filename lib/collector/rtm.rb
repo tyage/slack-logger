@@ -34,6 +34,16 @@ module Collector
           logger.update_emojis
         end
 
+        realtime.on :reaction_added do |c|
+          puts "reaction has added"
+          logger.new_reaction(c['item']['ts'], c['reaction'], c['user'])
+        end
+
+        realtime.on :reaction_removed do |c|
+          puts "reaction has removed"
+          logger.drop_reaction(c['item']['ts'], c['reaction'], c['user'])
+        end
+
         # if connection closed, restart the realtime logger
         realtime.on :close do
           puts "websocket disconnected"

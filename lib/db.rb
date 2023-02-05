@@ -5,6 +5,60 @@ config = YAML.load_file('./config.yml')
 db_config = config['database']
 db = Mongo::Client.new([ db_config['uri'] ], database: db_config['database'])
 
+def denormalize_message(message)
+  # denormalize reactions
+  if message.has_key? 'reactions'
+    message['reactions'] = message['reactions'].flat_map do |reaction|
+      if reaction.has_key? 'user'
+        [{
+          'name' => reaction['name'],
+          'user' => reaction['user'],
+        }]
+      end
+      if reaction.has_key? 'users'
+        reaction['users'].map do |user|
+          {
+            'name' => reaction['name'],
+            'user' => user,
+          }
+        end
+      end
+    end
+  end
+  message
+end
+
+def normalize_message(message)
+  # normalize reactions
+  if message.has_key? 'reactions'
+    reactions = Hash.new do |h, k|
+      h[k] = {
+        'count' => 0,
+        'name' => k,
+        'users' => [],
+      }
+    end
+    message['reactions'].map do |reaction|
+      if reaction.has_key? 'user'
+        reactions[reaction['name']]['users'] << reaction['user']
+        reactions[reaction['name']]['count'] += 1
+      end
+      if reaction.has_key? 'users'
+        reactions[reaction['name']]['users'].push(*reaction['users'])
+        reactions[reaction['name']]['count'] += reaction['count']
+      end
+    end
+    message['reactions'] = reactions.values
+  end
+  message
+end
+
+def normalize_messages(messages)
+  messages.each do |message|
+    normalize_message(message)
+  end
+end
+
 Users = db['users']
 Users.indexes.create_one({ :id => 1 }, :unique => true)
 def replace_users(users)
@@ -54,9 +108,40 @@ def insert_message(message)
         insert_message(message_inside)
       end
     else
+      denormalize_message(message)
       index = { :ts => message[:ts] || message['ts'] }
       Messages.replace_one(index, message, { :upsert => true })
     end
   rescue
   end
+end
+
+def add_reaction(ts, name, user)
+  Messages.update_one(
+    { :ts => ts },
+    {
+      :$addToSet => {
+        :reactions => {
+          :name => name,
+          :user => user,
+        },
+      },
+    },
+  )
+end
+
+def remove_reaction(ts, name, user)
+  Messages.update_one(
+    { :ts => ts },
+    {
+      :$pull => {
+        :reactions => {
+          :$in => [{
+            :name => name,
+            :user => user,
+          }],
+        },
+      },
+    },
+  )
 end
