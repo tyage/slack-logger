@@ -7,13 +7,8 @@ db = Mongo::Client.new([ db_config['uri'] ], database: db_config['database'])
 
 def denormalize_message(message)
   # denormalize reactions
-  if message.has_key? :reactions
-    reactions = message[:reactions]
-  elsif message.has_key? 'reactions'
-    reactions = message['reactions']
-  end
-  unless reactions.nil?
-    message['reactions'] = reactions.flat_map do |reaction|
+  if message.has_key? 'reactions'
+    message['reactions'] = message['reactions'].flat_map do |reaction|
       reaction['users'].map do |user|
         {
           'name' => reaction['name'],
