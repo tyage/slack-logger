@@ -9,11 +9,19 @@ def denormalize_message(message)
   # denormalize reactions
   if message.has_key? 'reactions'
     message['reactions'] = message['reactions'].flat_map do |reaction|
-      reaction['users'].map do |user|
-        {
+      if reaction.has_key? 'user'
+        [{
           'name' => reaction['name'],
-          'user' => user,
-        }
+          'user' => reaction['user'],
+        }]
+      end
+      if reaction.has_key? 'users'
+        reaction['users'].map do |user|
+          {
+            'name' => reaction['name'],
+            'user' => user,
+          }
+        end
       end
     end
   end
@@ -31,8 +39,14 @@ def normalize_message(message)
       }
     end
     message['reactions'].map do |reaction|
-      reactions[reaction['name']]['users'] << reaction['user']
-      reactions[reaction['name']]['count'] += 1
+      if reaction.has_key? 'user'
+        reactions[reaction['name']]['users'] << reaction['user']
+        reactions[reaction['name']]['count'] += 1
+      end
+      if reaction.has_key? 'users'
+        reactions[reaction['name']]['users'].push(*reaction['users'])
+        reactions[reaction['name']]['count'] += reaction['count']
+      end
     end
     message['reactions'] = reactions.values
   end
