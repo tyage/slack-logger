@@ -24,7 +24,14 @@ class SlackLogger
 
   def new_message(message)
     return if skip_message?(message)
-    insert_message(message)
+    if message['subtype'] == 'message_changed'
+      new_message({
+        **message['message'],
+        'channel' => message['channel'],
+      })
+    else
+      insert_message(message)
+    end
   end
 
   def new_reaction(ts, name, user)
