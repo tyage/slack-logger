@@ -98,8 +98,12 @@ class MessagesList extends React.Component {
     if (hideThreadOnlyMessages) {
       const isThreadOnlyMessages =
         typeof message.thread_ts === 'string' &&
+        message.thread_ts !== message.ts &&
         message.subtype !== 'thread_broadcast';
-      if (isThreadOnlyMessages) {
+      const isExcluded =
+        location.pathname.startsWith('/search/') ||
+        location.pathname.startsWith('/thread/');
+      if (isThreadOnlyMessages && !isExcluded) {
         return false;
       }
     }
