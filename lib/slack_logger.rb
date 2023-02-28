@@ -17,9 +17,13 @@ class SlackLogger
     channel_name[0] == 'D'
   end
 
+  def is_tombstone(message)
+    message['subtype'] == 'tombstone'
+  end
+
   def skip_message?(message)
     channel = message['channel']
-    is_private_channel(channel) || is_direct_message(channel)
+    is_private_channel(channel) || is_direct_message(channel) || is_tombstone(message)
   end
 
   def new_message(message)
