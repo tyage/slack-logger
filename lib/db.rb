@@ -76,11 +76,10 @@ end
 Channels = db['channels']
 Channels.indexes.create_one({ :id => 1 }, :unique => true)
 def replace_channels(channels)
-  unless channels.nil?
-    ids = channels.map{ |channel| channel['id'] }
-    Channels.find(id: { '$in' => ids }).delete_many
-    Channels.insert_many(channels)
-  end
+  return if channels.nil?
+  ids = channels.map{ |channel| channel['id'] }
+  Channels.find(id: { '$in' => ids }).delete_many
+  Channels.insert_many(channels)
 end
 
 # Ims
@@ -91,11 +90,10 @@ Ims.indexes.create_one({ :id => 1 }, :unique => true)
 Emojis = db['emojis']
 Emojis.indexes.create_one({ :name => 1 }, :unique => true)
 def replace_emojis(emojis)
-  unless emojis.nil?
-    emoji_data = emojis.map{ |name, url| { 'name' => name, 'url' => url } }
-    Emojis.find(name: { '$in' => emojis.keys }).delete_many
-    Emojis.insert_many(emoji_data)
-  end
+  return if emojis.nil?
+  emoji_data = emojis.map{ |name, url| { 'name' => name, 'url' => url } }
+  Emojis.find(name: { '$in' => emojis.keys }).delete_many
+  Emojis.insert_many(emoji_data)
 end
 
 Messages = db['messages']
