@@ -3,10 +3,10 @@ require './lib/slack'
 require './lib/db'
 
 class SlackLogger
-  attr_reader :client
+  attr_reader :slack
 
   def initialize
-    @client = Slack::Web::Client.new
+    @slack = SlackPatron::SlackClient.new
   end
 
   def is_private_channel(channel_name)
@@ -47,33 +47,31 @@ class SlackLogger
   end
 
   def update_users
-    users = client.users_list['members']
+    users = slack.users_list
     replace_users(users)
   end
 
   def update_channels
-    channels = client.conversations_list({type: 'public_channel'})['channels']
+    channels = slack.conversations_list
     replace_channels(channels)
   end
 
   def update_emojis
-    emojis = client.emoji_list['emoji'] rescue nil
+    emojis = slack.emoji_list
     replace_emojis(emojis)
   end
 
-  # log history messages
-  def fetch_history(target, channel)
-    messages = client.send(
-      target,
-      channel: channel,
-      count: 1000,
-    )['messages'] rescue nil
+  def fetch_history(channel)
+    begin
+      messages = slack.conversations_history(channel, 1000)
+    rescue Slack::Web::Api::Errors::NotInChannel
+      return # どうしようもないね
+    end
+    return if messages.nil?
 
-    unless messages.nil?
-      messages.each do |m|
-        m['channel'] = channel
-        insert_message(m)
-      end
+    messages.each do |m|
+      m['channel'] = channel
+      insert_message(m)
     end
   end
 
@@ -85,12 +83,10 @@ class SlackLogger
       update_users
       update_channels
 
-      Channels.find.each do |c|
-        puts "loading messages from #{c[:name]}"
-        if c[:is_channel]
-          fetch_history(:conversations_history, c[:id])
-        end
-        sleep(1)
+      Channels.find.each do |channel|
+        puts "loading messages from #{channel[:name]}"
+        fetch_history channel[:id]
+        sleep 1
       end
 
       # realtime event is joined and dont exit current thread
