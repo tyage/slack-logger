@@ -5,7 +5,10 @@ require 'securerandom'
 # XXX using string hash key for backword compatibility...
 config = {
   'slack' => {
-    'token' => nil
+    'token' => nil,
+    'team_id' => nil,
+    'use_events_api' => false,
+    'signing_secret' => nil,
   },
   'aws' => {
     'access_key_id' => nil,
@@ -15,6 +18,9 @@ config = {
   'database' => {
     'uri' => 'mongo:27017',
     'database' => 'slack_logger'
+  },
+  'rack' => { # TODO: unnecessary?
+    'secret' => SecureRandom.hex
   }
 }
 

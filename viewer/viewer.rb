@@ -91,24 +91,25 @@ end
 def messages(params)
   limit = params[:limit] || 100
   ts_direction = params[:min_ts].nil? ? -1 : 1
-  condition = {
-    hidden: { '$ne' => true }
-  }
-  condition[:ts] = { '$gte' => params[:min_ts] } unless params[:min_ts].nil?
-  condition[:ts] = { '$lte' => params[:max_ts] } unless params[:max_ts].nil?
-  condition[:channel] = params[:channel] unless params[:channel].nil?
+  conditions = [
+    { '$or' => [{ hidden: { '$ne' => true } }, { subtype: 'tombstone' }] },
+  ]
+  conditions << { ts: { '$gte' => params[:min_ts] } } unless params[:min_ts].nil?
+  conditions << { ts: { '$lte' => params[:max_ts] } } unless params[:max_ts].nil?
+  conditions << { channel: params[:channel] } unless params[:channel].nil?
 
   # search thread replies
-  condition[:thread_ts] = params[:thread_ts] unless params[:thread_ts].nil?
+  conditions << { thread_ts: params[:thread_ts] } unless params[:thread_ts].nil?
 
   all_messages = Messages
-    .find(condition)
+    .find({ '$and' => conditions })
     .sort(ts: ts_direction)
   has_more_message = all_messages.count({limit: limit+1}) > limit
   return_messages = all_messages.limit(limit).to_a
   return_messages = return_messages.reverse if ts_direction == -1
 
   sign_message_files(return_messages)
+  normalize_messages(return_messages)
 
   return return_messages, has_more_message
 end
@@ -167,6 +168,7 @@ def search(params)
     end
     all_messages = all_messages.reverse if ts_direction == 'desc'
     sign_message_files(all_messages)
+    normalize_messages(all_messages)
     # FIXME: The meaning of hits.total.value might change in ElasticSearch 8
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#hits-total-now-object-search-response
     return all_messages, res_data['hits']['total']['value'] > limit

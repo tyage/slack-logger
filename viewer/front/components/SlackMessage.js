@@ -42,32 +42,6 @@ export default class extends Component {
   formatDate(date) {
     return new Date(date * 1000).toLocaleString();
   }
-  formatText(text) {
-    const entity = (str) => {
-      return str.replace(/"/g, "&quot;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    };
-    const channelLink = (id) => {
-      const channel = this.getChannel(id);
-      return `#${channel && channel.name}`;
-    };
-    const userLink = (id) => {
-      const user = this.getUser(id);
-      return `@${user && user.name}`;
-    };
-    const specialCommand = (command) => `@${command}`;
-    const uriLink = (uri) => `<a href="${uri}" target="_blank">${uri}</a>`;
-    if (text) {
-      return text.replace(/<#([0-9A-Za-z]+)>/, (m, id) => channelLink(id))
-        .replace(/<#([0-9A-Za-z]+)\|([0-9A-Za-z]+)>/gi, (m, id) => channelLink(id))
-        .replace(/<@([0-9A-Za-z]+)>/gi, (m, id) => userLink(id))
-        .replace(/<@([0-9A-Za-z]+)\|([0-9A-Za-z]+)>/gi, (m, id) => userLink(id))
-        .replace(/<!(channel|everyone|group)>/gi, (m, command) => specialCommand(command))
-        .replace(/<([a-z0-9]+:\/\/[^>]*)>/gi, (m, uri) => uriLink(entity(uri)));
-    }
-    return text;
-  }
   messageLink(message) {
     return `/${message.channel}/${message.ts}`;
   }
@@ -100,7 +74,7 @@ export default class extends Component {
       }
 
       return (
-        <div className={classNames.join(' ')} ref={this.props.messageRef}>
+        <div className={ classNames.join(' ') } ref={this.props.messageRef}>
           <div className="slack-message-user-image">
             <img src={icon} />
           </div>
@@ -112,22 +86,22 @@ export default class extends Component {
                   {this.formatDate(message.ts)}
                 </Link>
               </div>
-              {showChannel && channel ? (
-                <div className="slack-message-channel">
-                  <Link to={`/${channel.id}`}>
-                    <ChannelName channel={channel} />
-                  </Link>
-                </div>
-              ) : null}
+              { showChannel && channel ? (
+                  <div className="slack-message-channel">
+                    <Link to={ `/${channel.id}` }>
+                      <ChannelName channel={channel} />
+                    </Link>
+                  </div>
+                ) : null }
               <div className="slack-original-message-link">
                 <a href={this.originalMessageLink(teamInfo, message)} target="_blank">open original</a>
               </div>
-              {message.thread_ts && this.props.type !== MessagesType.THREAD_MESSAGES && (
+              { message.thread_ts && this.props.type !== MessagesType.THREAD_MESSAGES && (
                 <div className="slack-message-thread">
                   <Link to={this.threadLink(message)}>
                     view thread
                   </Link>
-                </div>)}
+                </div> ) }
             </div>
             {
               Array.isArray(message.blocks) ? (
@@ -140,25 +114,31 @@ export default class extends Component {
                 </div>
               ) : (
                 <div className="slack-message-text">
-                  <MrkdwnText text={text} />
+                  { message.subtype === 'tombstone' ? (
+                    <span className="slack-message-tombstone">
+                      このメッセージは消去されました。<a href="https://github.com/tsg-ut/tsgbot/issues/3" target="_black">詳細</a>
+                    </span>
+                  ) : (
+                    <MrkdwnText text={text} />
+                  ) }
                 </div>
               )
             }
           </div>
-          {message.attachments && message.attachments.map((attachment) => (
+          { message.attachments && message.attachments.map((attachment) => (
             <Attachment key={attachment.id} attachment={attachment} />
-          ))}
-          {message.files && (
+          )) }
+          { message.files && (
             <Files files={message.files} />
-          )}
+          ) }
           {/* Compatibility with the old messages */}
-          {message.file && (
+          { message.file && (
             <Files files={[message.file]} />
-          )}
-          {message.reactions && message.reactions.length > 0 && (
+          ) }
+          { message.reactions && message.reactions.length > 0 && (
             <div className="slack-message-reactions">{
               message.reactions.map((reaction) => this.renderReaction(reaction))
-            }</div>)}
+            }</div> ) }
         </div>
       );
     };
@@ -191,26 +171,26 @@ export default class extends Component {
       const text = (!message.text && attachment) ? attachment.text : message.text;
       const icon = getBotMessageUserIcon(message);
       return <SlackMessagePrototype
-        message={message}
-        icon={icon}
-        username={message.username}
-        showChannel={showChannel}
-        teamInfo={teamInfo}
-        text={text}
-      />
+          message={message}
+          icon={icon}
+          username={message.username}
+          showChannel={showChannel}
+          teamInfo={teamInfo}
+          text={text}
+        />
     };
     const normalMessage = (teamInfo, message, user, showChannel) => {
       return <SlackMessagePrototype
-        message={message}
-        icon={user && user.profile.image_48}
-        username={user && (user.profile.display_name || user.profile.real_name || user.name)}
-        showChannel={showChannel}
-        teamInfo={teamInfo}
-        text={message.text}
-      />
+          message={message}
+          icon={user && user.profile.image_48}
+          username={user && (user.profile.display_name || user.profile.real_name || user.name)}
+          showChannel={showChannel}
+          teamInfo={teamInfo}
+          text={message.text}
+        />
     };
 
-    if (this.props.message.hidden) {
+    if (this.props.message.hidden && this.props.message.subtype !== 'tombstone') {
       return null;
     }
 

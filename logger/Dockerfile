@@ -1,5 +1,5 @@
 FROM ruby:2.7.2-alpine
-LABEL maintainer="namatyage@gmail.com"
+LABEL maintainer="TSG <info@tsg.ne.jp>"
 
 ARG SRCDIR="/usr/local/slack-patron"
 
@@ -20,7 +20,5 @@ COPY Gemfile.lock ${SRCDIR}/
 WORKDIR ${SRCDIR}
 
 RUN bundle install
-
-COPY ./ ${SRCDIR}/
 
 CMD /wait-for-it.sh -t 0 mongo:27017 -- /wait-for-it.sh -t 0 elasticsearch:9200 -- bundle exec ruby logger/logger.rb

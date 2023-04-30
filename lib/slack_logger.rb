@@ -2,10 +2,10 @@ require './lib/slack'
 require './lib/db'
 
 class SlackLogger
-  attr_reader :client
+  attr_reader :slack
 
   def initialize
-    @client = Slack::Web::Client.new
+    @slack = SlackPatron::SlackClient.new
   end
 
   def is_private_channel(channel_name)
@@ -16,109 +16,82 @@ class SlackLogger
     channel_name[0] == 'D'
   end
 
+  def is_tombstone(message)
+    message['subtype'] == 'tombstone'
+  end
+
+  def skip_message?(message)
+    channel = message['channel']
+    is_private_channel(channel) || is_direct_message(channel) || is_tombstone(message)
+  end
+
+  def new_message(message)
+    return if skip_message?(message)
+    if message['subtype'] == 'message_changed'
+      new_message({
+        **message['message'],
+        'channel' => message['channel'],
+      })
+    else
+      insert_message(message)
+    end
+  end
+
+  def new_reaction(ts, name, user)
+    add_reaction(ts, name, user)
+  end
+
+  def drop_reaction(ts, name, user)
+    remove_reaction(ts, name, user)
+  end
+
   def update_users
-    users = client.users_list['members']
+    users = slack.users_list
     replace_users(users)
   end
 
   def update_channels
-    channels = client.conversations_list({type: 'public_channel'})['channels']
+    channels = slack.conversations_list
     replace_channels(channels)
   end
 
   def update_emojis
-    emojis = client.emoji_list['emoji'] rescue nil
+    emojis = slack.emoji_list
     replace_emojis(emojis)
   end
 
-  # log history messages
-  def fetch_history(target, channel)
-    messages = client.send(
-      target,
-      channel: channel,
-      count: 1000,
-    )['messages'] rescue nil
-
-    unless messages.nil?
-      messages.each do |m|
-        m['channel'] = channel
-        insert_message(m)
-      end
+  def fetch_history(channel)
+    begin
+      messages = slack.conversations_history(channel, 1000)
+    rescue Slack::Web::Api::Errors::NotInChannel
+      return # どうしようもないね
     end
-  end
+    return if messages.nil?
 
-  # realtime events
-  def log_realtime
-    realtime = Slack::RealTime::Client.new
-
-    realtime.on :message do |m|
-      if is_private_channel(m['channel'])
-        next
-      end
-      if is_direct_message(m['channel'])
-        next
-      end
-
-      puts m
+    messages.each do |m|
+      m['channel'] = channel
       insert_message(m)
     end
-
-    realtime.on :team_join do |e|
-      puts "new user has joined"
-      update_users
-    end
-
-    realtime.on :user_change do |e|
-      puts "user data has changed"
-      update_users
-    end
-
-    realtime.on :channel_created do |c|
-      puts "channel has created"
-      update_channels
-    end
-
-    realtime.on :channel_rename do |c|
-      puts "channel has renamed"
-      update_channels
-    end
-
-    realtime.on :emoji_changed do |c|
-      puts "emoji has changed"
-      update_emojis
-    end
-
-    # if connection closed, restart the realtime logger
-    realtime.on :close do
-      puts "websocket disconnected"
-      log_realtime
-    end
-
-    realtime.start!
   end
 
-  def start
+  def start(collector)
     begin
-      realtime_thread = Thread.new {
-        log_realtime
-      }
+      collector_thread = Thread.new { collector.start!(self) }
 
       update_emojis
       update_users
       update_channels
 
-      Channels.find.each do |c|
-        puts "loading messages from #{c[:name]}"
-        if c[:is_channel]
-          fetch_history(:conversations_history, c[:id])
-        end
-        sleep(1)
+      Channels.find.each do |channel|
+        puts "loading messages from #{channel[:name]}"
+        fetch_history channel[:id]
+        sleep 1
       end
 
       # realtime event is joined and dont exit current thread
-      realtime_thread.join
+      collector_thread.join
     ensure
-      realtime_thread.kill
+      collector_thread.kill
     end
   end
 end

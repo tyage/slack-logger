@@ -1,6 +1,6 @@
 {
   "name": "slack-patron",
-  "version": "3.0.1",
+  "version": "2.0.1",
   "description": "![http://i.gyazo.com/626298851b7eb9a878b72ccc788b7086.png](http://i.gyazo.com/626298851b7eb9a878b72ccc788b7086.png)",
   "main": "index.js",
   "engines": {
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tyage/slack-patron.git"
+    "url": "https://github.com/tsg-ut/slack-patron.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tyage/slack-patron/issues"
+    "url": "https://github.com/tsg-ut/slack-patron/issues"
   },
-  "homepage": "https://github.com/tyge/slack-patron",
+  "homepage": "https://github.com/tsg-ut/slack-patron",
   "dependencies": {
     "@babel/core": "^7.12.10",
     "@babel/plugin-proposal-object-rest-spread": "^7.12.1",

@@ -1,4 +1,6 @@
 viewer/public/build
+viewer/node_modules
+viewer/npm-debug.log
 node_modules/
 npm-debug.log
 .git/

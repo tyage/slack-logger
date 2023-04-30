@@ -1,5 +1,5 @@
 FROM ruby:2.7.2-alpine
-LABEL maintainer="namatyage@gmail.com"
+LABEL maintainer="TSG <info@tsg.ne.jp>"
 
 ARG SRCDIR="/usr/local/slack-patron"
 
@@ -18,11 +18,10 @@ COPY Gemfile ${SRCDIR}/
 COPY Gemfile.lock ${SRCDIR}/
 RUN bundle install
 
-COPY viewer/ ${SRCDIR}/viewer/
-RUN ./viewer/setup.sh
+COPY viewer/package.json ${SRCDIR}/viewer/
+COPY viewer/package-lock.json ${SRCDIR}/viewer/
+RUN cd ${SRCDIR}/viewer && npm install
 
-COPY ./ ${SRCDIR}/
-
-CMD bundle exec puma viewer/config.ru -C viewer/puma.rb -p 9292
+CMD ./viewer/setup.sh && bundle exec puma viewer/config.ru -C viewer/puma.rb -p 9292
 
 EXPOSE 9292

@@ -81,21 +81,52 @@ class MessagesList extends React.Component {
       }
     }
   }
+  showMessage(message) {
+    const hideBotMessages = this.props.displayOptions.hideBotMessages ?? false;
+    const hideThreadOnlyMessages = this.props.displayOptions.hideThreadOnlyMessages ?? false;
+
+    if (hideBotMessages) {
+      const isBotMessage =
+        message.subtype === 'bot_message' ||
+        typeof message.bot_id === 'string' ||
+        message.user === 'USLACKBOT';
+      if (isBotMessage) {
+        return false;
+      }
+    }
+
+    if (hideThreadOnlyMessages) {
+      const isThreadOnlyMessages =
+        typeof message.thread_ts === 'string' &&
+        message.thread_ts !== message.ts &&
+        message.subtype !== 'thread_broadcast';
+      const isExcluded =
+        location.pathname.startsWith('/search/') ||
+        location.pathname.startsWith('/thread/');
+      if (isThreadOnlyMessages && !isExcluded) {
+        return false;
+      }
+    }
+
+    return true;
+  }
   render() {
     this.tsToNode = {};
 
-    const createMessages = (messages) => messages.map(message => (
-        <SlackMessage
-          message={message}
-          users={this.props.users}
-          emojis={this.props.emojis}
-          teamInfo={this.props.teamInfo}
-          channels={this.props.channels}
-          ims={this.props.ims}
-          key={message.ts}
-          type={this.props.messagesInfo.type}
-          selected={message.ts === this.props.scrollToTs}
-          messageRef={ n => this.tsToNode[message.ts] = n } />
+    const createMessages = (messages) => messages.flatMap(message => (
+        this.showMessage(message) ? [
+          <SlackMessage
+            message={message}
+            users={this.props.users}
+            emojis={this.props.emojis}
+            teamInfo={this.props.teamInfo}
+            channels={this.props.channels}
+            ims={this.props.ims}
+            key={message.ts}
+            type={this.props.messagesInfo.type}
+            selected={message.ts === this.props.scrollToTs}
+            messageRef={ n => this.tsToNode[message.ts] = n } />
+        ] : []
       ));
     const loadMoreSection = (isPast) => {
       if (!this.props.onLoadMoreMessages) {
@@ -139,7 +170,8 @@ const mapStateToProps = state => {
     channels: state.channels.channels,
     ims: state.channels.ims,
     emojis: state.emojis,
-    teamInfo: state.teamInfo
+    teamInfo: state.teamInfo,
+    displayOptions: state.displayOptions,
   };
 };
 
