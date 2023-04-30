@@ -13,7 +13,7 @@ Slack::RealTime::Client.configure do |c|
 end
 
 Slack::Events.configure do |c|
-  c.signing_secret = config['slack']['use_events_api'] ? config['slack']['signing_secret'] : nil
+  c.signing_secret = config[:slack][:use_events_api] ? config[:slack][:signing_secret] : nil
 end
 
 module SlackPatron

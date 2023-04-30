@@ -19,9 +19,6 @@ config = {
     'uri' => 'mongo:27017',
     'database' => 'slack_logger'
   },
-  'rack' => { # TODO: unnecessary?
-    'secret' => SecureRandom.hex
-  }
 }
 
 OptionParser.new do |opts|

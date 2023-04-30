@@ -11,7 +11,10 @@ module SlackPatronConfig
 
     {
       slack: {
-        token:  value('slack', 'token')
+        token:  value('slack', 'token'),
+        team_id: value('slack', 'team_id'),
+        use_events_api: value('slack', 'use_events_api'),
+        signing_secret: value('slack', 'signing_secret'),
       },
       aws: {
         access_key_id: value('aws', 'access_key_id'),
