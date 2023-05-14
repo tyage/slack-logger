@@ -64,7 +64,7 @@ class SlackLogger
   def fetch_history(channel)
     begin
       messages = slack.conversations_history(channel, 1000)
-    rescue Slack::Web::Api::Errors::NotInChannel
+    rescue Slack::Web::Api::Errors::NotInChannel, Slack::Web::Api::Errors::ChannelNotFound
       return # どうしようもないね
     end
     return if messages.nil?

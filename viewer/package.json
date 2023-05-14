@@ -32,9 +32,9 @@
     "history": ">=4.10.1 <5.0.0",
     "lodash": "^4.17.20",
     "normalize.css": "^8.0.1",
-    "react": "^17.0.1",
+    "react": "^16",
     "react-datepicker": "^4.1.1",
-    "react-dom": "^17.0.1",
+    "react-dom": "^16",
     "react-redux": "^7.2.2",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
@@ -46,9 +46,9 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.12.1",
-    "css-loader": "^5.0.1",
-    "less": "^4.0.0",
-    "less-loader": "^7.1.0",
+    "css-loader": "^6.7.3",
+    "less": "^4",
+    "less-loader": "^11.1.0",
     "style-loader": "^2.0.0",
     "webpack-cli": "^4.2.0"
   }

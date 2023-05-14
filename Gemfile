@@ -15,3 +15,5 @@ gem "slack-ruby-client"
 gem "async-websocket", '~> 0.8.0' # dependency of slack-ruby-client RTM
 
 gem "rack", "~> 2.2"
+
+gem 'wdm', '>= 0.1.0', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
