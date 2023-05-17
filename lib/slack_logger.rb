@@ -1,4 +1,3 @@
-require 'yaml'
 require './lib/slack'
 require './lib/db'
 

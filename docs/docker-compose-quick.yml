@@ -1,29 +1,16 @@
 version: '3'
 services:
   logger:
-    build:
-      context: ./
-      dockerfile: ./logger/Dockerfile
-    container_name: slack-patron-logger
-    volumes:
-      - .:/usr/local/slack-patron
-    ports:
-      - "127.0.0.1:9293:9293"
+    image: tyage/slack-patron-logger
     environment:
       - SLACK_PATRON_SLACK_TOKEN
       - SLACK_PATRON_DATABASE_URI=mongo:27017
       - SLACK_PATRON_DATABASE_DATABASE=slack_logger
     links:
       - mongo
-    restart: always
 
   viewer:
-    build:
-      context: ./
-      dockerfile: ./viewer/Dockerfile
-    container_name: slack-patron-viewer
-    volumes:
-      - .:/usr/local/slack-patron
+    image: tyage/slack-patron-viewer
     ports:
       - "127.0.0.1:9292:9292"
     environment:
@@ -34,7 +21,7 @@ services:
     restart: always
 
   connector:
-    build: connector
+    image: tyage/slack-patron-connector
     environment:
       - MONSTACHE_DIRECT_READ_NS=slack_logger.messages
       - MONSTACHE_ES_URLS=http://elasticsearch:9200
@@ -45,7 +32,7 @@ services:
     restart: always
 
   elasticsearch:
-    build: elasticsearch
+    image: tyage/slack-patron-elasticsearch
     environment:
       - ES_JAVA_OPTS=-Xms200m -Xmx640m -XX:G1PeriodicGCInterval=60k
       - discovery.type=single-node

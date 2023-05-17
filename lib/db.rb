@@ -1,9 +1,10 @@
 require 'mongo'
+require './lib/config'
 
-config = YAML.load_file('./config.yml')
+config = SlackPatronConfig.config
 
-db_config = config['database']
-db = Mongo::Client.new([ db_config['uri'] ], database: db_config['database'])
+db_config = config[:database]
+db = Mongo::Client.new([ db_config[:uri] ], database: db_config[:database])
 
 def denormalize_message(message)
   # denormalize reactions

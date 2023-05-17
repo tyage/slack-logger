@@ -2,7 +2,3 @@
 /vendor/bundle
 config.yml
 /tmp
-/logs
-/pids
-/datadir
-/mongo-log

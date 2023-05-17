@@ -2,18 +2,19 @@ require 'sinatra'
 require 'net/http'
 require 'json'
 require 'aws-sdk'
+require './lib/config'
 require './lib/slack_import'
 require './lib/slack'
 require './lib/db'
 
-$config = YAML.load_file('./config.yml')
+$config = SlackPatronConfig.config
 $signer = nil
 
-if $config.has_key? 'aws'
+if $config[:aws]&.values.all?
   Aws.config.update({
     credentials: Aws::Credentials.new(
-      $config['aws']['access_key_id'],
-      $config['aws']['secret_access_key'],
+      $config[:aws][:access_key_id],
+      $config[:aws][:secret_access_key],
     ),
     region: 'ap-northeast-1',
   })
@@ -264,7 +265,7 @@ end
 get '/' do
   hashed_channels = channels
   default_channel, _ = hashed_channels.find do |id, channel|
-    channel[:name] == $config['default_channel']
+    channel[:name] == $config[:default_channel]
   end
   if default_channel.nil?
     default_channel, _ = hashed_channels.first
