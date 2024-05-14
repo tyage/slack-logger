@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Emoji from './Emoji';
+import Element, { Text } from './Element';
 import UserMention from './UserMention';
 import ChannelMention from './ChannelMention';
 
@@ -154,6 +155,36 @@ class RichTextBlock extends Component {
   }
 }
 
+class SectionBlock extends Component {
+  render() {
+    const {text, fields, accessory} = this.props;
+
+    return (
+      <div className="section-block">
+        <div className="section-block-body">
+          <div className="section-block-text">
+            <Text text={text} />
+          </div>
+          {fields && fields.length > 0 && (
+            <div className="section-block-fields">
+              {fields.map((field, index) => (
+                <div key={index} className="section-block-field">
+                  <Text text={field} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {accessory && (
+          <div className="section-block-accessory">
+            <Element element={accessory} />
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
 export default class extends Component {
   constructor(props) {
     super(props);
@@ -169,6 +200,7 @@ export default class extends Component {
   }
   render() {
     const {block} = this.props;
+
     if (block.type === 'rich_text') {
       return (
         <div className="slack-message-block">
@@ -176,11 +208,20 @@ export default class extends Component {
         </div>
       )
     }
+
+    // https://api.slack.com/reference/block-kit/blocks#section
+    if (block.type === 'section') {
+      return (
+        <div className="slack-message-block">
+          <SectionBlock text={block.text} fields={block.fields} accessory={block.accessory} />
+        </div>
+      )
+    }
+
     return (
       <div className="slack-message-block">
-        {/* TODO */}
         <div className="slack-message-unsupported-block" onClick={this.handleToggleRawData}>
-          ⚠️未対応のブロック (クリックで生データ表示)
+          ⚠️ Unsupported block (click to show raw data)
         </div>
         { !this.state.isHidden && (
           <pre className="slack-message-block-raw">

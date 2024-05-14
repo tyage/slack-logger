@@ -62,6 +62,24 @@ class Footer extends Component {
   }
 }
 
+class Fields extends Component {
+  render() {
+    const {fields} = this.props;
+    return (
+      <div className="attachment-fields">
+        {
+          fields.map((field, index) => (
+            <div key={index} className="attachment-field">
+              <div className="attachment-field-title">{field.title}</div>
+              <div className="attachment-field-value">{field.value}</div>
+            </div>
+          ))
+        }
+      </div>
+    );
+  }
+}
+
 export default class extends Component {
   render() {
     const {attachment} = this.props;
@@ -92,16 +110,7 @@ export default class extends Component {
               </div>
             )}
             {attachment.fields && (
-              <div className="attachment-fields">
-                {
-                  attachment.fields.map((field, index) => (
-                    <div key={index} className="attachment-field">
-                      <div className="attachment-field-title">{field.title}</div>
-                      <div className="attachment-field-value">{field.value}</div>
-                    </div>
-                  ))
-                }
-              </div>
+              <Fields fields={attachment.fields} />
             )}
             {(attachment.footer || attachment.footer_icon || attachment.ts) && (
               <Footer text={attachment.footer} icon={attachment.footer_icon} ts={attachment.ts}/>

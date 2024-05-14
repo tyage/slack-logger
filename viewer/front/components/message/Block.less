@@ -75,3 +75,37 @@
     border-radius: 0.25rem;
   }
 }
+
+.section-block {
+  margin-bottom: 8px;
+
+  display: flex;
+  @media @mobile {
+    flex-direction: column;
+  }
+
+  .section-block-body {
+    flex: 1 1 0;
+  }
+
+  .section-block-accessory {
+    flex: 0 0 auto;
+
+    @media @mobile {
+      margin-top: 4px;
+    }
+  }
+
+  .section-block-fields {
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 400px;
+
+    .section-block-field {
+      flex: 0 0 50%;
+      margin: 0.1rem 0;
+    }
+  }
+}

@@ -69,14 +69,16 @@ class MrkdwnText extends React.Component {
       return `:${name}:`;
     };
     if (text) {
-      return text.replace(/<#([0-9A-Za-z]+)>/, (m, id) => channelLink(id))
+      return text
+        .replace(/<#([0-9A-Za-z]+)>/, (m, id) => channelLink(id))
         .replace(/<#([0-9A-Za-z]+)\|([0-9A-Za-z]+)>/gi, (m, id) => channelLink(id))
         .replace(/<@([0-9A-Za-z]+)>/gi, (m, id) => userLink(id))
         .replace(/<@([0-9A-Za-z]+)\|([0-9A-Za-z]+)>/gi, (m, id) => userLink(id))
         .replace(/<!(channel|everyone|group)>/gi, (m, command) => specialCommand(command))
         .replace(/<(https?:\/\/[^>|]*)\|(.+?)>/gi, (m, uri, text) => uriLink(entity(uri), entity(text)))
         .replace(/<(https?:\/\/[^>|]*)>/gi, (m, uri) => uriLink(entity(uri), entity(uri)))
-        .replace(emojiRegex, (m, name) => emojiImage(name));
+        .replace(emojiRegex, (m, name) => emojiImage(name))
+        .replace(/[*＊](.+?)[*＊]/gi, (m, text) => `<strong>${text}</strong>`);
     }
     return text;
   }
