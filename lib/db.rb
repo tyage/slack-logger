@@ -112,8 +112,16 @@ def insert_message(message)
       end
     else
       denormalize_message(message)
+
+      files = message[:files] || message['files']
+      if !files.nil? && files.is_a?(Array)
+        if files.any? { |file| file['mode'] == 'hidden_by_limit' }
+          message.delete(:files) || message.delete('files')
+        end
+      end
+
       index = { :ts => message[:ts] || message['ts'] }
-      Messages.replace_one(index, message, { :upsert => true })
+      Messages.update_one(index, { :$set => message }, { :upsert => true })
     end
   rescue
   end
